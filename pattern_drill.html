@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pattern drill</title>
 <style>
@@ -229,7 +228,7 @@ const CARDS = [
 $("n-cards").textContent = CARDS.length;
 $("g-card").textContent = "1 / " + CARDS.length;
 
-// Seeded shuffle: everyone gets the same cards, in the same order, with the same order of sentences.
+// Seeded shuffle of the cards: everyone gets the same cards in the same order.
 // The first attempt on a page always uses seed 1, the next one seed 2, and so on.
 function rng(seed) {
   let a = seed >>> 0;
@@ -261,7 +260,8 @@ function makeDeck(seed) {
       }
     }
   }
-  return deck.map(c => ({ verb: c.verb, opts: shuffle(c.opts, rand) }));
+  // the order of cards is the same for everyone, the sentences inside a card are shuffled at random every game
+  return deck.map(c => ({ verb: c.verb, opts: shuffle(c.opts, Math.random) }));
 }
 
 // time in tenths of a second -> "12.3 s" or "1:02.3"
