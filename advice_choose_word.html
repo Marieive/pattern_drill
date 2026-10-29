@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choose the correct word: advice</title>
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --card: #ffffff;
+    --ink: #22252b;
+    --muted: #6a6f7a;
+    --line: #dcd8cf;
+    --btn: #eef1f7;
+    --btn-line: #b9c2d6;
+    --ok: #1f8a4c;
+    --ok-bg: #dff3e6;
+    --bad: #c0392b;
+    --bad-bg: #f9dedb;
+    --accent: #3b5bdb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1d22;
+      --card: #25282f;
+      --ink: #eceef3;
+      --muted: #9aa0ad;
+      --line: #3a3e48;
+      --btn: #2f3440;
+      --btn-line: #4a5164;
+      --ok: #62d08c;
+      --ok-bg: #1f3a2b;
+      --bad: #ff8d80;
+      --bad-bg: #44251f;
+      --accent: #8da2ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 22px/1.55 "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 56px; }
+  h1 { font-size: 34px; margin: 0 0 4px; }
+  .lead { color: var(--muted); margin: 0 0 18px; font-size: 20px; }
+  .bar {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 18px; font-size: 20px;
+  }
+  .track { flex: 1 1 200px; height: 12px; background: var(--line); border-radius: 6px; overflow: hidden; }
+  .fill { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 16px;
+  }
+  .num { color: var(--muted); font-size: 16px; margin: 0 0 6px; letter-spacing: .04em; }
+  .line { margin: 6px 0; }
+  .who { font-weight: 700; margin-right: 6px; }
+  .gap { display: inline-flex; gap: 6px; vertical-align: baseline; margin: 0 2px; }
+  .gap button {
+    font: inherit; font-size: 20px; padding: 0 12px; line-height: 1.5;
+    background: var(--btn); color: var(--ink);
+    border: 2px solid var(--btn-line); border-radius: 10px; cursor: pointer;
+  }
+  .gap button:hover:not(:disabled) { border-color: var(--accent); }
+  .gap button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .gap button.bad {
+    background: var(--bad-bg); border-color: var(--bad); color: var(--bad);
+    text-decoration: line-through; cursor: default;
+    animation: shake .3s;
+  }
+  .gap .ok {
+    background: var(--ok-bg); color: var(--ok); font-weight: 700;
+    border-radius: 10px; padding: 0 12px;
+  }
+  .hint {
+    margin: 12px 0 0; padding: 8px 12px; border-left: 4px solid var(--ok);
+    background: var(--ok-bg); border-radius: 6px; font-size: 18px;
+  }
+  .hint[hidden], #done[hidden] { display: none; }
+  #done {
+    text-align: center; padding: 16px; margin: 8px 0 16px; font-size: 26px; font-weight: 700;
+    color: var(--ok);
+  }
+  .reset {
+    font: inherit; font-size: 18px; padding: 6px 18px; cursor: pointer;
+    background: transparent; color: var(--ink);
+    border: 2px solid var(--btn-line); border-radius: 10px;
+  }
+  @keyframes shake {
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  @media (max-width: 520px) {
+    body { font-size: 19px; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Choose the correct word</h1>
+  <p class="lead">Click the word that fits the gap. Wrong? It turns red, try another one.</p>
+
+  <div class="bar">
+    <span id="count">0 / 0</span>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <span id="miss">Mistakes: 0</span>
+  </div>
+
+  <div id="list"></div>
+  <div id="done" hidden></div>
+  <button class="reset" id="reset" type="button">Start again</button>
+</main>
+
+<script>
+// Correct option is marked with *. Order of options is as written.
+const DIALOGS = [
+  {
+    lines: [
+      ["A", "Please don’t {*take|get} this the wrong way, but your talk was a bit too long."],
+      ["B", "Thanks for being honest. And don’t {take|*get} me wrong, I’m not offended. I just need time to think."]
+    ],
+    hint: "take it / this the wrong way = обидеться, понять не так. Don’t get me wrong = не поймите меня неправильно (без it)."
+  },
+  {
+    lines: [
+      ["A", "Could you give me {an|*some} advice about buying a laptop?"],
+      ["B", "Sure. If you ask {my|I|*me}, spend more on the battery than on the screen."]
+    ],
+    hint: "advice неисчисляемое: some advice, a piece of advice, но не an advice. If you ask me = по-моему."
+  },
+  {
+    lines: [
+      ["A", "I told Lucy to ask for a raise, but she never {heard|*took|got} my advice."],
+      ["B", "Don’t push her. You {*had better|would better} let her decide for herself."]
+    ],
+    hint: "take advice = прислушаться к совету. had better + глагол = лучше бы (would better не бывает)."
+  },
+  {
+    lines: [
+      ["A", "I dropped so many hints, but he just didn’t {take|*get} the message."],
+      ["B", "Some people are really hard to get {over|*through|out} to."],
+      ["A", "I know. Honestly, I’d rather not get {included|*involved} again."]
+    ],
+    hint: "get the message = понять намёк. get through to someone = достучаться до человека. get involved = ввязаться."
+  },
+  {
+    lines: [
+      ["A", "Speaking {for|*as} a mum of three, I’d say sleep matters more than any diet."],
+      ["B", "That’s not what I wanted to hear!"],
+      ["A", "I’m only saying it {as|to|*for} your own good."]
+    ],
+    hint: "as + роль (as a mum, as a teacher). for your own good = для твоей же пользы, фраза устойчивая."
+  },
+  {
+    lines: [
+      ["A", "Don’t get the {bad|*wrong} idea, I’m really happy for you."],
+      ["B", "Thanks! It’s not a {*bad|wrong} idea to have a plan B, though, is it?"]
+    ],
+    hint: "get the wrong idea = понять неверно, сделать неверный вывод. not a bad idea = неплохая мысль."
+  }
+];
+
+const list = document.getElementById("list");
+const countEl = document.getElementById("count");
+const missEl = document.getElementById("miss");
+const fillEl = document.getElementById("fill");
+const doneEl = document.getElementById("done");
+
+let total = 0, solved = 0, mistakes = 0;
+
+function render() {
+  list.innerHTML = "";
+  doneEl.hidden = true;
+  total = 0; solved = 0; mistakes = 0;
+
+  DIALOGS.forEach((d, i) => {
+    const card = document.createElement("section");
+    card.className = "card";
+    const num = document.createElement("p");
+    num.className = "num";
+    num.textContent = "DIALOGUE " + (i + 1);
+    card.appendChild(num);
+
+    let open = 0;
+    const hint = document.createElement("p");
+    hint.className = "hint";
+    hint.hidden = true;
+    hint.textContent = d.hint;
+
+    d.lines.forEach(([who, text]) => {
+      const p = document.createElement("p");
+      p.className = "line";
+      const w = document.createElement("span");
+      w.className = "who";
+      w.textContent = who + ":";
+      p.appendChild(w);
+
+      let last = 0;
+      text.replace(/\{([^}]+)\}/g, (m, body, idx) => {
+        p.appendChild(document.createTextNode(text.slice(last, idx)));
+        last = idx + m.length;
+        p.appendChild(makeGap(body, () => {
+          open--;
+          if (open === 0) hint.hidden = false;
+        }));
+        open++; total++;
+        return m;
+      });
+      p.appendChild(document.createTextNode(text.slice(last)));
+      card.appendChild(p);
+    });
+
+    card.appendChild(hint);
+    list.appendChild(card);
+  });
+  update();
+}
+
+function makeGap(body, onSolved) {
+  const gap = document.createElement("span");
+  gap.className = "gap";
+  body.split("|").forEach(raw => {
+    const right = raw.startsWith("*");
+    const word = right ? raw.slice(1) : raw;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = word;
+    b.addEventListener("click", () => {
+      if (right) {
+        gap.innerHTML = "";
+        const s = document.createElement("span");
+        s.className = "ok";
+        s.textContent = word;
+        gap.appendChild(s);
+        solved++;
+        onSolved();
+        update();
+      } else if (!b.disabled) {
+        b.classList.add("bad");
+        b.disabled = true;
+        mistakes++;
+        update();
+      }
+    });
+    gap.appendChild(b);
+  });
+  return gap;
+}
+
+function update() {
+  countEl.textContent = solved + " / " + total;
+  missEl.textContent = "Mistakes: " + mistakes;
+  fillEl.style.width = total ? (solved / total * 100) + "%" : "0";
+  if (total && solved === total) {
+    doneEl.textContent = mistakes === 0
+      ? "Perfect! No mistakes."
+      : "Done! Mistakes: " + mistakes + ". Read the notes once more.";
+    doneEl.hidden = false;
+  }
+}
+
+document.getElementById("reset").addEventListener("click", render);
+render();
+</script>
+</body>
+</html>

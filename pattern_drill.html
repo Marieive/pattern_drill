@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pattern drill</title>
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --card: #ffffff;
+    --ink: #22252b;
+    --muted: #6a6f7a;
+    --line: #dcd8cf;
+    --btn: #f3f5fa;
+    --btn-line: #c3cadb;
+    --ok: #1f8a4c;
+    --ok-bg: #dff3e6;
+    --bad: #c0392b;
+    --bad-bg: #f9dedb;
+    --accent: #3b5bdb;
+    --c1: #3b5bdb;
+    --c2: #9c36b5;
+    --c3: #e8590c;
+    --c4: #0c8599;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1d22;
+      --card: #25282f;
+      --ink: #eceef3;
+      --muted: #9aa0ad;
+      --line: #3a3e48;
+      --btn: #2f3440;
+      --btn-line: #4a5164;
+      --ok: #62d08c;
+      --ok-bg: #1f3a2b;
+      --bad: #ff8d80;
+      --bad-bg: #44251f;
+      --accent: #8da2ff;
+      --c1: #8da2ff;
+      --c2: #d0a2ee;
+      --c3: #ff9f6b;
+      --c4: #5fd0e2;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 20px/1.5 "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 56px; }
+  h1 { font-size: 34px; margin: 0 0 4px; }
+  h2 { font-size: 22px; margin: 28px 0 10px; }
+  .lead { color: var(--muted); margin: 0 0 20px; }
+  .muted { color: var(--muted); font-size: 17px; }
+  .ghost {
+    font: inherit; font-size: 18px; padding: 6px 18px; cursor: pointer; margin-right: 8px;
+    background: var(--card); color: var(--ink);
+    border: 2px solid var(--btn-line); border-radius: 10px;
+  }
+  .primary {
+    font: inherit; font-size: 22px; padding: 10px 40px; margin-top: 10px; cursor: pointer;
+    background: var(--accent); color: #fff; border: 0; border-radius: 12px;
+  }
+
+  /* game */
+  .top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .stat { font-size: 20px; }
+  .stat b { font-size: 26px; }
+  #clock { font-size: 40px; font-weight: 700; min-width: 130px; text-align: right; font-variant-numeric: tabular-nums; }
+  .track { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; margin: 8px 0 18px; }
+  #tfill { height: 100%; width: 0; background: var(--accent); transition: width .15s; }
+  .verb {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    text-align: center; padding: 30px 12px; font-size: 56px; font-weight: 700; line-height: 1.15;
+    min-height: 150px; display: flex; align-items: center; justify-content: center;
+  }
+  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .ans {
+    font: inherit; font-size: 22px; text-align: left; cursor: pointer; color: var(--ink);
+    display: flex; align-items: center; gap: 12px; min-height: 100px; padding: 10px 14px;
+    background: var(--btn); border: 2px solid var(--btn-line); border-left-width: 10px; border-radius: 12px;
+  }
+  .blank {
+    display: inline-block; width: 2.4em; margin: 0 3px; vertical-align: baseline;
+    border-bottom: 3px solid var(--muted);
+  }
+  .ans .n {
+    flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 700; font-size: 18px; background: currentColor;
+  }
+  .ans .n span { color: var(--card); }
+  .ans:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .ans:hover:not(:disabled) { border-color: var(--accent); }
+  .ans.right { background: var(--ok-bg); border-color: var(--ok); }
+  .ans.wrong { background: var(--bad-bg); border-color: var(--bad); }
+  .ans:disabled { cursor: default; color: var(--ink); }
+  .p1 { border-left-color: var(--c1); } .p1 .n { color: var(--c1); }
+  .p2 { border-left-color: var(--c2); } .p2 .n { color: var(--c2); }
+  .p3 { border-left-color: var(--c3); } .p3 .n { color: var(--c3); }
+  .p4 { border-left-color: var(--c4); } .p4 .n { color: var(--c4); }
+
+  /* feedback + next */
+  .after {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    min-height: 100px; margin-top: 16px;
+  }
+  #fbtext { font-size: 21px; }
+  #fbtext .verdict { font-weight: 700; }
+  #fbtext .good { color: var(--ok); }
+  #fbtext .bad { color: var(--bad); }
+  #fbtext .tag { display: block; color: var(--muted); font-size: 16px; }
+  #next { flex: none; margin: 0; padding: 10px 36px; }
+
+  /* result */
+  .big { font-size: 64px; font-weight: 700; margin: 4px 0; color: var(--ok); font-variant-numeric: tabular-nums; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 14px 0 18px; }
+  .box { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+  .box .v { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .box .k { color: var(--muted); font-size: 16px; }
+  ul.review { margin: 6px 0 0; padding-left: 22px; font-size: 19px; }
+  ul.review li { margin: 8px 0; }
+  ul.review .tag { display: block; color: var(--muted); font-size: 16px; }
+  .actions { margin-top: 20px; }
+
+  @media (max-width: 640px) {
+    body { font-size: 18px; }
+    .answers { grid-template-columns: 1fr; }
+    .ans { min-height: 76px; font-size: 20px; }
+    .verb { font-size: 42px; }
+    .after { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <section id="s-start">
+    <h1>Pattern drill</h1>
+    <p class="lead">A verb appears. Pick the sentence where it fits. The stopwatch stops after the last card: the lowest time wins.</p>
+    <p class="muted"><span id="n-cards"></span> cards, one correct sentence in each. Every mistake adds 3 seconds to your final time. The stopwatch pauses while you read the answer, so press Next when you are ready. Keys: 1 to 4 to answer, Enter for Next.</p>
+    <button class="primary" id="start" type="button">Start</button>
+  </section>
+
+  <section id="s-game" hidden>
+    <div class="top">
+      <span class="stat">Card <b id="g-card"></b></span>
+      <span class="stat">Mistakes <b id="g-bad">0</b></span>
+      <span id="clock">0.0 s</span>
+    </div>
+    <div class="track"><div id="tfill"></div></div>
+    <div class="verb" id="verb"></div>
+    <div class="answers" id="answers"></div>
+    <div class="after">
+      <div id="fbtext"></div>
+      <button class="primary" id="next" type="button" hidden>Next</button>
+    </div>
+  </section>
+
+  <section id="s-result" hidden>
+    <h1>Finished</h1>
+    <div class="big" id="r-big"></div>
+    <div class="muted">final time: stopwatch + 3 s for every mistake</div>
+    <div class="grid" id="r-grid"></div>
+    <div id="r-review"></div>
+    <div class="actions">
+      <button class="primary" id="again" type="button">Play again</button>
+      <button class="ghost" id="copy" type="button">Copy result</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const PENALTY = 3; // seconds added for every mistake
+
+// Names of the six patterns from the reference table; shown after the answer as a hint.
+const LABEL = {
+  ing:    "verb + -ing",
+  prep:   "verb + preposition + -ing",
+  that:   "verb + that",
+  to:     "verb + infinitive with to",
+  objto:  "verb + object + infinitive with to",
+  objing: "verb + object + preposition + -ing"
+};
+
+// Every card: a bare verb and four sentences, exactly one is correct.
+// ___ is where the verb goes (the subject is "They", so the verb keeps the form on the card).
+// A verb with two patterns in the table gets two cards, each with one correct sentence.
+// Wrong sentences are near misses and are wrong in standard English; valid patterns that are
+// not in the table are never offered as options.
+const R = (s, p) => ({ s, p });
+const W = s => ({ s });
+const CARDS = [
+  { verb: "admit",     opts: [R("They ___ taking the money.", "ing"), W("They ___ to take the money."), W("They ___ about taking the money."), W("They ___ take the money.")] },
+  { verb: "admit",     opts: [R("They ___ that they were wrong.", "that"), W("They ___ him that they were wrong."), W("They ___ about being wrong."), W("They ___ for being wrong.")] },
+  { verb: "apologise", opts: [R("They ___ for being late.", "prep"), W("They ___ being late."), W("They ___ to be late."), W("They ___ him for being late.")] },
+  { verb: "suggest",   opts: [R("They ___ taking a taxi.", "ing"), W("They ___ to take a taxi."), W("They ___ us to take a taxi."), W("They ___ about taking a taxi.")] },
+  { verb: "suggest",   opts: [R("They ___ that we take a taxi.", "that"), W("They ___ us that we take a taxi."), W("They ___ for us to take a taxi."), W("They ___ about us taking a taxi.")] },
+  { verb: "propose",   opts: [R("They ___ moving the meeting.", "ing"), W("They ___ about moving the meeting."), W("They ___ for moving the meeting."), W("They ___ move the meeting.")] },
+  { verb: "recommend", opts: [R("They ___ booking early.", "ing"), W("They ___ to book early."), W("They ___ about booking early."), W("They ___ for booking early.")] },
+  { verb: "deny",      opts: [R("They ___ breaking the window.", "ing"), W("They ___ to break the window."), W("They ___ of breaking the window."), W("They ___ about breaking the window.")] },
+  { verb: "boast",     opts: [R("They ___ about winning the prize.", "prep"), W("They ___ winning the prize."), W("They ___ to win the prize."), W("They ___ for winning the prize.")] },
+  { verb: "boast",     opts: [R("They ___ that they never make mistakes.", "that"), W("They ___ us that they never make mistakes."), W("They ___ never making mistakes."), W("They ___ to never make mistakes.")] },
+  { verb: "insist",    opts: [R("They ___ on paying for dinner.", "prep"), W("They ___ to pay for dinner."), W("They ___ paying for dinner."), W("They ___ about paying for dinner.")] },
+  { verb: "insist",    opts: [R("They ___ that we stay.", "that"), W("They ___ us to stay."), W("They ___ for us to stay."), W("They ___ about us staying.")] },
+  { verb: "claim",     opts: [R("They ___ that the story is true.", "that"), W("They ___ him that the story is true."), W("They ___ the story being true."), W("They ___ about the story being true.")] },
+  { verb: "claim",     opts: [R("They ___ to know the owner.", "to"), W("They ___ knowing the owner."), W("They ___ him to know the owner."), W("They ___ about knowing the owner.")] },
+  { verb: "doubt",     opts: [R("They ___ that he will come.", "that"), W("They ___ him to come."), W("They ___ to see him."), W("They ___ about his coming.")] },
+  { verb: "remind",    opts: [R("They ___ us that the shop closes at six.", "that"), W("They ___ that the shop closes at six."), W("They ___ to us that the shop closes at six."), W("They ___ us the shop to close at six.")] },
+  { verb: "remind",    opts: [R("They ___ us to bring the keys.", "objto"), W("They ___ to bring the keys."), W("They ___ us bringing the keys."), W("They ___ us for bringing the keys.")] },
+  { verb: "refuse",    opts: [R("They ___ to sign the contract.", "to"), W("They ___ signing the contract."), W("They ___ him to sign the contract."), W("They ___ about signing the contract.")] },
+  { verb: "threaten",  opts: [R("They ___ to quit.", "to"), W("They ___ quitting."), W("They ___ him to quit."), W("They ___ for quitting.")] },
+  { verb: "agree",     opts: [R("They ___ to help.", "to"), W("They ___ helping."), W("They ___ him to help."), W("They ___ for helping.")] },
+  { verb: "offer",     opts: [R("They ___ to drive us home.", "to"), W("They ___ driving us home."), W("They ___ us to drive home."), W("They ___ about driving us home.")] },
+  { verb: "persuade",  opts: [R("They ___ him to apply.", "objto"), W("They ___ to apply."), W("They ___ him applying."), W("They ___ him for applying.")] },
+  { verb: "encourage", opts: [R("They ___ us to ask questions.", "objto"), W("They ___ to ask questions."), W("They ___ us asking questions."), W("They ___ that we ask questions.")] },
+  { verb: "warn",      opts: [R("They ___ him to be careful.", "objto"), W("They ___ to be careful."), W("They ___ him being careful."), W("They ___ him be careful.")] },
+  { verb: "advise",    opts: [R("They ___ him to see a doctor.", "objto"), W("They ___ to see a doctor."), W("They ___ him seeing a doctor."), W("They ___ him see a doctor.")] },
+  { verb: "criticise", opts: [R("They ___ him for being late.", "objing"), W("They ___ for being late."), W("They ___ him about being late."), W("They ___ him to be late.")] },
+  { verb: "question",  opts: [R("They ___ him about deleting the files.", "objing"), W("They ___ about deleting the files."), W("They ___ him of deleting the files."), W("They ___ him to delete the files.")] },
+  { verb: "accuse",    opts: [R("They ___ him of copying the essay.", "objing"), W("They ___ of copying the essay."), W("They ___ him for copying the essay."), W("They ___ him to copy the essay.")] }
+];
+$("n-cards").textContent = CARDS.length;
+$("g-card").textContent = "1 / " + CARDS.length;
+
+// Seeded shuffle: everyone gets the same cards, in the same order, with the same order of sentences.
+// The first attempt on a page always uses seed 1, the next one seed 2, and so on.
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, rand) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function makeDeck(seed) {
+  const rand = rng(seed * 7919 + 13);
+  const deck = shuffle(CARDS, rand);
+  // the same verb never comes twice in a row
+  for (let i = 1; i < deck.length; i++) {
+    if (deck[i].verb !== deck[i - 1].verb) continue;
+    for (let j = i + 1; j < deck.length; j++) {
+      if (deck[j].verb !== deck[i - 1].verb && (j + 1 >= deck.length || deck[j + 1].verb !== deck[i].verb)) {
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+        break;
+      }
+    }
+  }
+  return deck.map(c => ({ verb: c.verb, opts: shuffle(c.opts, rand) }));
+}
+
+// time in tenths of a second -> "12.3 s" or "1:02.3"
+function fmt(tenths) {
+  const s = tenths / 10;
+  if (s < 60) return s.toFixed(1) + " s";
+  const m = Math.floor(s / 60);
+  return m + ":" + (s - m * 60).toFixed(1).padStart(4, "0");
+}
+
+function show(id) {
+  ["s-start", "s-game", "s-result"].forEach(s => { $(s).hidden = s !== id; });
+}
+
+// four answer buttons, filled for every card
+const answersBox = $("answers");
+const buttons = [];
+for (let i = 0; i < 4; i++) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "ans p" + (i + 1);
+  const n = document.createElement("span");
+  n.className = "n";
+  const nn = document.createElement("span");
+  nn.textContent = String(i + 1);
+  n.appendChild(nn);
+  const t = document.createElement("span");
+  b.append(n, t);
+  b.addEventListener("click", () => answer(i));
+  answersBox.appendChild(b);
+  buttons.push(b);
+}
+
+// sentence with a blank where the verb goes
+function fillBlank(el, template) {
+  el.textContent = "";
+  template.split("___").forEach((part, k) => {
+    if (k) {
+      const blank = document.createElement("span");
+      blank.className = "blank";
+      el.appendChild(blank);
+    }
+    el.appendChild(document.createTextNode(part));
+  });
+}
+// the same sentence with the verb written in, verb in bold
+function fillVerb(el, template, verb) {
+  el.textContent = "";
+  template.split("___").forEach((part, k) => {
+    if (k) {
+      const b = document.createElement("b");
+      b.textContent = verb;
+      el.appendChild(b);
+    }
+    el.appendChild(document.createTextNode(part));
+  });
+}
+
+let game = null, tickId = null, attempts = 0;
+
+// stopwatch time in ms: runs while a card is open, stands still while the answer is shown
+function elapsedMs() {
+  return (game.pauseAt || Date.now()) - game.startAt - game.pausedMs;
+}
+
+function startGame() {
+  attempts++;
+  game = {
+    deck: makeDeck(attempts), i: 0, cur: null,
+    correct: 0, wrong: 0, streak: 0, best: 0, missed: [],
+    startAt: Date.now(), pauseAt: null, pausedMs: 0, awaiting: false, over: false
+  };
+  show("s-game");
+  next();
+  tick();
+  clearInterval(tickId);
+  tickId = setInterval(tick, 100);
+}
+
+function next() {
+  game.cur = game.deck[game.i];
+  $("verb").textContent = game.cur.verb;
+  $("fbtext").innerHTML = "";
+  $("next").hidden = true;
+  buttons.forEach((b, i) => {
+    b.classList.remove("right", "wrong");
+    b.disabled = false;
+    fillBlank(b.lastChild, game.cur.opts[i].s);
+  });
+  updateStats();
+}
+
+function updateStats() {
+  const n = game.deck.length;
+  $("g-card").textContent = (game.i + 1) + " / " + n;
+  $("g-bad").textContent = game.wrong;
+  $("tfill").style.width = ((game.i + (game.awaiting ? 1 : 0)) / n * 100) + "%";
+}
+
+function tick() {
+  if (!game || game.over) return;
+  $("clock").textContent = fmt(Math.floor(elapsedMs() / 100));
+}
+
+function rightOne(card) {
+  return card.opts.find(o => o.p);
+}
+
+function showFeedback(ok) {
+  const box = $("fbtext");
+  box.innerHTML = "";
+  const first = document.createElement("div");
+  const verdict = document.createElement("span");
+  verdict.className = "verdict " + (ok ? "good" : "bad");
+  verdict.textContent = ok ? "Correct." : "Not quite.";
+  first.appendChild(verdict);
+  box.appendChild(first);
+
+  const o = rightOne(game.cur);
+  const d = document.createElement("div");
+  fillVerb(d, o.s, game.cur.verb);
+  box.appendChild(d);
+  const tag = document.createElement("span");
+  tag.className = "tag";
+  tag.textContent = LABEL[o.p];
+  box.appendChild(tag);
+}
+
+function answer(index) {
+  if (!game || game.over || game.awaiting) return;
+  game.pauseAt = Date.now();
+  game.awaiting = true;
+
+  const ok = !!game.cur.opts[index].p;
+  if (ok) {
+    game.correct++;
+    game.streak++;
+    game.best = Math.max(game.best, game.streak);
+  } else {
+    game.wrong++;
+    game.streak = 0;
+    game.missed.push(game.cur);
+  }
+
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (game.cur.opts[i].p) b.classList.add("right");
+  });
+  if (!ok) buttons[index].classList.add("wrong");
+
+  showFeedback(ok);
+  $("next").textContent = game.i === game.deck.length - 1 ? "Finish" : "Next";
+  $("next").hidden = false;
+  updateStats();
+  tick();
+}
+
+function goNext() {
+  if (!game || game.over || !game.awaiting) return;
+  game.awaiting = false;
+  if (game.i >= game.deck.length - 1) { finish(); return; }
+  game.pausedMs += Date.now() - game.pauseAt;
+  game.pauseAt = null;
+  game.i++;
+  next();
+}
+
+function finish() {
+  if (!game || game.over) return;
+  game.over = true;
+  clearInterval(tickId);
+
+  const watch = Math.round(elapsedMs() / 100);
+  const total = watch + game.wrong * PENALTY * 10;
+  game.summary = { watch, total };
+
+  $("r-big").textContent = fmt(total);
+
+  const g = $("r-grid");
+  g.innerHTML = "";
+  [["Stopwatch", fmt(watch)],
+   ["Mistakes", game.wrong + (game.wrong ? " (+" + game.wrong * PENALTY + " s)" : "")],
+   ["Correct", game.correct + " / " + game.deck.length],
+   ["Best streak", game.best]].forEach(([k, v]) => {
+    const box = document.createElement("div");
+    box.className = "box";
+    const vv = document.createElement("div"); vv.className = "v"; vv.textContent = v;
+    const kk = document.createElement("div"); kk.className = "k"; kk.textContent = k;
+    box.append(vv, kk);
+    g.appendChild(box);
+  });
+
+  const rev = $("r-review");
+  rev.innerHTML = "";
+  if (game.missed.length) {
+    const h = document.createElement("h2");
+    h.textContent = "Check these";
+    const ul = document.createElement("ul");
+    ul.className = "review";
+    game.missed.forEach(card => {
+      const o = rightOne(card);
+      const li = document.createElement("li");
+      const line = document.createElement("div");
+      fillVerb(line, o.s, card.verb);
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = LABEL[o.p];
+      li.append(line, tag);
+      ul.appendChild(li);
+    });
+    rev.append(h, ul);
+  }
+  show("s-result");
+}
+
+function resultLine() {
+  const s = game.summary;
+  return "time " + fmt(s.total) + " | stopwatch " + fmt(s.watch) + " + " + game.wrong + " mistakes x " + PENALTY +
+         " s | correct " + game.correct + "/" + game.deck.length + " | best streak " + game.best;
+}
+function copyText(text) {
+  const done = () => { $("copy").textContent = "Copied"; setTimeout(() => { $("copy").textContent = "Copy result"; }, 1500); };
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch (e) {}
+    ta.remove();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, fallback);
+  } else fallback();
+}
+
+$("start").addEventListener("click", startGame);
+$("again").addEventListener("click", startGame);
+$("next").addEventListener("click", goNext);
+$("copy").addEventListener("click", () => copyText(resultLine()));
+
+document.addEventListener("keydown", e => {
+  if (!game || game.over || $("s-game").hidden) return;
+  if (game.awaiting) {
+    if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
+      e.preventDefault();
+      goNext();
+    }
+    return;
+  }
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 4) answer(n - 1);
+});
+</script>
+</body>
+</html>
